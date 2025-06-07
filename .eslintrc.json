@@ -1,0 +1,67 @@
+{
+  "root": true,
+  "ignorePatterns": ["**/*"],
+  "overrides": [
+    {
+      "files": ["*.js", "*.cjs", "*.mjs", "*.ts"],
+      "extends": ["airbnb-base", "prettier"],
+      "rules": {
+        "import/order": [
+          "error",
+          {
+            "alphabetize": { "order": "asc" },
+            "newlines-between": "always",
+            "groups": ["builtin", "external", "internal", "parent", "sibling", "index"]
+          }
+        ],
+        "import/prefer-default-export": "off",
+        "import/no-relative-packages": "off",
+        "no-console": "off",
+        "sort-imports": [
+          "error",
+          {
+            "ignoreCase": true,
+            "ignoreDeclarationSort": true
+          }
+        ],
+        "spaced-comment": ["off"]
+      }
+    },
+    {
+      "files": ["*.ts"],
+      "extends": ["plugin:@typescript-eslint/recommended", "airbnb-typescript/base", "prettier"],
+      "parserOptions": {
+        "createDefaultProgram": true
+      },
+      "settings": {
+        "import/parsers": {
+          "@typescript-eslint/parser": [".ts", ".tsx"]
+        },
+        "import/resolver": {
+          "typescript": {
+            "alwaysTryTypes": true
+          }
+        }
+      },
+      "rules": {
+        "@typescript-eslint/explicit-member-accessibility": [
+          "error",
+          {
+            "accessibility": "explicit",
+            "overrides": { "constructors": "no-public" }
+          }
+        ],
+        "@typescript-eslint/no-floating-promises": "error",
+        "@typescript-eslint/no-non-null-assertion": "off",
+        "@typescript-eslint/no-use-before-define": "off",
+        "import/no-default-export": "error",
+        "import/no-extraneous-dependencies": [
+          "error",
+          {
+            "devDependencies": ["**/spec/**", "**/test/**", "**/jest.config.js", "**/test-setup.ts"]
+          }
+        ]
+      }
+    }
+  ]
+}
