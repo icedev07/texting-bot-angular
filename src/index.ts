@@ -33,12 +33,68 @@ import { ParseTextBotCommandOutput, Group } from './interfaces';
  *
  * If you cannot determine a group and message, return null.
  *
- * @param rawInput
+ * @param rawInput The raw input string from the user
+ * @param groups Array of available groups
+ * @returns ParseTextBotCommandOutput or null if parsing fails
  */
 
 export const parseTextBotCommand = (rawInput: string, groups: Group[]): ParseTextBotCommandOutput | null => {
+  // Check if input starts with "txt" (case insensitive)
+  const txtPrefix = rawInput.toLowerCase().trim().startsWith('txt');
+  if (!txtPrefix) {
+    return null;
+  }
+
+  // Remove "txt" prefix and trim
+  const inputWithoutPrefix = rawInput.slice(3).trim();
+
+  // Find the longest matching group
+  let bestMatch: { group: Group; startIndex: number; endIndex: number } | null = null;
+
+  for (const group of groups) {
+    // Normalize both the group name and input by removing all spaces and converting to lowercase
+    const normalizedGroupName = group.name.toLowerCase().replace(/\s+/g, '');
+    const normalizedInput = inputWithoutPrefix.toLowerCase().replace(/\s+/g, '');
+
+    // Try to find the group name in the input
+    const startIndex = normalizedInput.indexOf(normalizedGroupName);
+    if (startIndex !== -1) {
+      const endIndex = startIndex + normalizedGroupName.length;
+      
+      // If this is the first match or longer than previous match
+      if (!bestMatch || (endIndex - startIndex) > (bestMatch.endIndex - bestMatch.startIndex)) {
+        bestMatch = {
+          group,
+          startIndex,
+          endIndex
+        };
+      }
+    }
+  }
+
+  if (!bestMatch) {
+    return null;
+  }
+
+  // Find the actual group name in the original input
+  const originalInput = inputWithoutPrefix.toLowerCase();
+  const groupName = bestMatch.group.name.toLowerCase();
+  
+  // Create a regex pattern that matches the group name with flexible whitespace
+  const groupNamePattern = groupName.split(/\s+/).join('\\s+');
+  const groupRegex = new RegExp(groupNamePattern, 'i');
+  const groupMatch = originalInput.match(groupRegex);
+  
+  if (!groupMatch) {
+    return null;
+  }
+
+  // Extract the message part (everything after the group name)
+  const messageStartIndex = groupMatch.index! + groupMatch[0].length;
+  const message = inputWithoutPrefix.slice(messageStartIndex).trim();
+
   return {
-    groupId: '1',
-    messageToSend: 'foo',
+    groupId: bestMatch.group.id,
+    messageToSend: message
   };
 };
